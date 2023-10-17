@@ -177,8 +177,8 @@ end]]></value>
 <property type='c'>
 <key><![CDATA[color]]></key>
 <value>
-<r>1</r>
-<g>0</g>
+<r>0.203922</r>
+<g>0.533333</g>
 <b>0</b>
 <a>1</a>
 </value>
@@ -242,6 +242,7 @@ end]]></value>
   print("INITIALIAING")
   color_off = "FF0000FF"
   color_on = "348800FF"
+  color_pending = "B59F00FF"
   
   self.color = color_off
   
@@ -258,10 +259,28 @@ function send_reliable_message(message)
   sendMIDI(message)
 end
 
+function onReceiveNotify(key, value)
+  print("RECEIVED NOTICE")
+  if key == "update_toggle" then
+    if value == 0 then 
+      self.color = color_off
+      toggle_started = false
+    elseif value == 1 then 
+      self.color = color_on
+      toggle_started = true
+    else
+      self.color = color_pending
+      toggle_started = true
+    end
+  end
+end
+
+
 function toggle_on()
       send_reliable_message({channel,toggle_on_channel, 127})
       send_reliable_message({channel,toggle_off_channel, 0})
       toggle_started = true
+      self.parent.children.button5:notify("update_toggle", 1)
       print("toggle_on")
 end
 
@@ -269,6 +288,7 @@ function toggle_off()
       send_reliable_message({channel,toggle_off_channel, 127})
       send_reliable_message({channel,toggle_on_channel, 0})
       toggle_started = false
+      self.parent.children.button5:notify("update_toggle", 0)
       print("toggle_off")
 end
 
@@ -284,6 +304,7 @@ function onValueChanged(key)
     else
       self.color = color_on
       toggle_on()
+
     end
   end
   
@@ -612,8 +633,8 @@ end]]></value>
 <property type='c'>
 <key><![CDATA[color]]></key>
 <value>
-<r>1</r>
-<g>0</g>
+<r>0.203922</r>
+<g>0.533333</g>
 <b>0</b>
 <a>1</a>
 </value>
@@ -675,7 +696,7 @@ end]]></value>
 <key><![CDATA[script]]></key>
 <value><![CDATA[function init()
   print("INITIALIAING")
-  
+  batman = "COOL"
   color_off = "FF0000FF"
   color_on = "348800FF"
   color_pending = "B59F00FF"
@@ -713,7 +734,7 @@ function update()
 
    delayed_start = false
    self.color = color_on
-
+   self.parent.children.drum_toggle:notify("update_toggle", 1)
    toggle_on()
   end
   
@@ -727,21 +748,42 @@ function toggle_off()
       print("toggle_off")
 end
 
+function onReceiveNotify(key, value)
+  if key == "update_delay" then
+    delay = value
+  elseif key == "update_toggle" then
+    if value == 0 then 
+      self.color = color_off
+      toggle_started = false
+    elseif value == 1 then 
+      self.color = color_on
+      toggle_started = true
+    else
+      self.color = color_pending
+      toggle_started = true
+    end
+  end
+  
+end
+
 function onValueChanged(key)
  if self.values[key] == true then
-
     print("SENDING TOGGLE ", toggle_started)
 
     if toggle_started then
-      self.color = color_off
       toggle_off()
       self.color = color_off
+      self.parent.children.drum_toggle:notify("update_toggle", 0)
    
     else
       self.color = color_pending
+      
       delayed_start = true 
       start_timer = getMillis()
       toggle_started = true
+      
+      self.parent.children.drum_toggle:notify("update_toggle", 3)
+      
       --- toggle_on()
     end
   end
@@ -1051,9 +1093,10 @@ function onValueChanged(key)
   val = self.values.x * 5
   whole, half =  math.modf(val)
   half = math.floor(half * 10 )
-  delay = whole + (half / 10)
+  delay = (whole + (half / 10)) * 1000
   print("Delay is ", delay)
   print("VAL is ", self.values.x)
+  self.parent.children.button5:notify("update_delay", delay)
  end
 end]]></value>
 </property>
@@ -2770,332 +2813,7 @@ end]]></value>
 </value>
 </values>
 </node>
-<node ID='6b8b0990-688a-11ee-a370-dcfb48dae4d6' type='TEXT'>
-<properties>
-<property type='b'>
-<key><![CDATA[background]]></key>
-<value>0</value>
-</property>
-<property type='c'>
-<key><![CDATA[color]]></key>
-<value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
-<a>1</a>
-</value>
-</property>
-<property type='f'>
-<key><![CDATA[cornerRadius]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[font]]></key>
-<value>0</value>
-</property>
-<property type='r'>
-<key><![CDATA[frame]]></key>
-<value>
-<x>181</x>
-<y>1</y>
-<w>86</w>
-<h>40</h>
-</value>
-</property>
-<property type='b'>
-<key><![CDATA[grabFocus]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[interactive]]></key>
-<value>0</value>
-</property>
-<property type='b'>
-<key><![CDATA[locked]]></key>
-<value>0</value>
-</property>
-<property type='s'>
-<key><![CDATA[name]]></key>
-<value><![CDATA[pattern_text]]></value>
-</property>
-<property type='i'>
-<key><![CDATA[orientation]]></key>
-<value>0</value>
-</property>
-<property type='b'>
-<key><![CDATA[outline]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[outlineStyle]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[pointerPriority]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[shape]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[textAlignH]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[textAlignV]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[textClip]]></key>
-<value>1</value>
-</property>
-<property type='c'>
-<key><![CDATA[textColor]]></key>
-<value>
-<r>1</r>
-<g>1</g>
-<b>1</b>
-<a>1</a>
-</value>
-</property>
-<property type='i'>
-<key><![CDATA[textSize]]></key>
-<value>18</value>
-</property>
-<property type='b'>
-<key><![CDATA[textWrap]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[visible]]></key>
-<value>1</value>
-</property>
-</properties>
-<values>
-<value>
-<key><![CDATA[text]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>1</lockedDefaultCurrent>
-<default><![CDATA[Pattern
-]]></default>
-<defaultPull>0</defaultPull>
-</value>
-<value>
-<key><![CDATA[touch]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[false]]></default>
-<defaultPull>0</defaultPull>
-</value>
-</values>
-</node>
 </children>
-</node>
-<node ID='b02d3548-695f-11ee-8a8e-dcfb48dae4d6' type='ENCODER'>
-<properties>
-<property type='b'>
-<key><![CDATA[background]]></key>
-<value>1</value>
-</property>
-<property type='c'>
-<key><![CDATA[color]]></key>
-<value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
-<a>1</a>
-</value>
-</property>
-<property type='f'>
-<key><![CDATA[cornerRadius]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[cursor]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[cursorDisplay]]></key>
-<value>0</value>
-</property>
-<property type='r'>
-<key><![CDATA[frame]]></key>
-<value>
-<x>180</x>
-<y>50</y>
-<w>150</w>
-<h>150</h>
-</value>
-</property>
-<property type='b'>
-<key><![CDATA[grabFocus]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[grid]]></key>
-<value>1</value>
-</property>
-<property type='c'>
-<key><![CDATA[gridColor]]></key>
-<value>
-<r>0</r>
-<g>0</g>
-<b>0</b>
-<a>0.25</a>
-</value>
-</property>
-<property type='i'>
-<key><![CDATA[gridSteps]]></key>
-<value>56</value>
-</property>
-<property type='b'>
-<key><![CDATA[interactive]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[locked]]></key>
-<value>0</value>
-</property>
-<property type='s'>
-<key><![CDATA[name]]></key>
-<value><![CDATA[encoder2]]></value>
-</property>
-<property type='i'>
-<key><![CDATA[orientation]]></key>
-<value>0</value>
-</property>
-<property type='b'>
-<key><![CDATA[outline]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[outlineStyle]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[pointerPriority]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[response]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[responseFactor]]></key>
-<value>100</value>
-</property>
-<property type='i'>
-<key><![CDATA[shape]]></key>
-<value>2</value>
-</property>
-<property type='b'>
-<key><![CDATA[visible]]></key>
-<value>0</value>
-</property>
-</properties>
-<values>
-<value>
-<key><![CDATA[touch]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[false]]></default>
-<defaultPull>0</defaultPull>
-</value>
-<value>
-<key><![CDATA[x]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[0]]></default>
-<defaultPull>0</defaultPull>
-</value>
-<value>
-<key><![CDATA[y]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[0]]></default>
-<defaultPull>0</defaultPull>
-</value>
-</values>
-<messages>
-<midi>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<message>
-<type>CONTROLCHANGE</type>
-<channel>8</channel>
-<data1>26</data1>
-<data2>0</data2>
-</message>
-<values>
-<value>
-<type>CONSTANT</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>15</scaleMax>
-</value>
-<value>
-<type>CONSTANT</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</value>
-<value>
-<type>VALUE</type>
-<key><![CDATA[x]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>127</scaleMax>
-</value>
-</values>
-</midi>
-<osc>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<path>
-<partial>
-<type>CONSTANT</type>
-<conversion>STRING</conversion>
-<value><![CDATA[/]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-<partial>
-<type>PROPERTY</type>
-<conversion>STRING</conversion>
-<value><![CDATA[name]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</path>
-<arguments>
-<partial>
-<type>VALUE</type>
-<conversion>FLOAT</conversion>
-<value><![CDATA[x]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</arguments>
-</osc>
-</messages>
 </node>
 <node ID='fc118676-695f-11ee-82f2-dcfb48dae4d6' type='ENCODER'>
 <properties>
@@ -3193,11 +2911,21 @@ end]]></value>
 <property type='s'>
 <key><![CDATA[script]]></key>
 <value><![CDATA[function init()
-   print("Initializing")
+   initialized = true
+   print("Initializing encoder")
    self.values.x = .035
    number_of_options = 16
-   option_array = {1,5,13,22,30,39,47,56,64,72,81,89,98,106,115,123}
+   kit_option_array = {1,5,13,22,30,39,47,56,64,72,81,89,98,106,115,123}
 end
+
+function onReceiveNotify(key, value)
+  print(value)
+  if key == "setkit" then
+    self.values.x = value / 16 - 0.030
+    print("Received setkit message")
+  end
+end
+
 
 function send_reliable_message(message)
   sendMIDI(message)
@@ -3206,9 +2934,11 @@ end
 
 
 function onValueChanged(key)
- position = math.floor( 16 * self.values.x ) + 1
- print(position, " Value ", option_array[position])
- send_reliable_message(({184, 25, option_array[position]})
+ if self.values[key] == true then
+  position = math.floor( 16 * self.values.x ) + 1
+  send_reliable_message({184, 25, kit_option_array[position]})
+  print(self.values.x)
+ end
 end]]></value>
 </property>
 <property type='i'>
@@ -3431,126 +3161,6 @@ end]]></value>
 <locked>0</locked>
 <lockedDefaultCurrent>1</lockedDefaultCurrent>
 <default><![CDATA[Ⓚ
-]]></default>
-<defaultPull>0</defaultPull>
-</value>
-<value>
-<key><![CDATA[touch]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[false]]></default>
-<defaultPull>0</defaultPull>
-</value>
-</values>
-</node>
-<node ID='d2a802a8-6967-11ee-a6e6-dcfb48dae4d6' type='TEXT'>
-<properties>
-<property type='b'>
-<key><![CDATA[background]]></key>
-<value>0</value>
-</property>
-<property type='c'>
-<key><![CDATA[color]]></key>
-<value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
-<a>1</a>
-</value>
-</property>
-<property type='f'>
-<key><![CDATA[cornerRadius]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[font]]></key>
-<value>1</value>
-</property>
-<property type='r'>
-<key><![CDATA[frame]]></key>
-<value>
-<x>220</x>
-<y>90</y>
-<w>70</w>
-<h>70</h>
-</value>
-</property>
-<property type='b'>
-<key><![CDATA[grabFocus]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[interactive]]></key>
-<value>0</value>
-</property>
-<property type='b'>
-<key><![CDATA[locked]]></key>
-<value>0</value>
-</property>
-<property type='s'>
-<key><![CDATA[name]]></key>
-<value><![CDATA[text15]]></value>
-</property>
-<property type='i'>
-<key><![CDATA[orientation]]></key>
-<value>0</value>
-</property>
-<property type='b'>
-<key><![CDATA[outline]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[outlineStyle]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[pointerPriority]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[shape]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[textAlignH]]></key>
-<value>2</value>
-</property>
-<property type='i'>
-<key><![CDATA[textAlignV]]></key>
-<value>2</value>
-</property>
-<property type='b'>
-<key><![CDATA[textClip]]></key>
-<value>1</value>
-</property>
-<property type='c'>
-<key><![CDATA[textColor]]></key>
-<value>
-<r>1</r>
-<g>1</g>
-<b>1</b>
-<a>1</a>
-</value>
-</property>
-<property type='i'>
-<key><![CDATA[textSize]]></key>
-<value>53</value>
-</property>
-<property type='b'>
-<key><![CDATA[textWrap]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[visible]]></key>
-<value>0</value>
-</property>
-</properties>
-<values>
-<value>
-<key><![CDATA[text]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>1</lockedDefaultCurrent>
-<default><![CDATA[Ⓟ
 ]]></default>
 <defaultPull>0</defaultPull>
 </value>
@@ -3886,9 +3496,9 @@ end]]></value>
 <property type='c'>
 <key><![CDATA[color]]></key>
 <value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
+<r>0.290196</r>
+<g>1</g>
+<b>0.376471</b>
 <a>1</a>
 </value>
 </property>
@@ -3944,6 +3554,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 1
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -4140,6 +3779,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 2
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -4334,6 +4002,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 3
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -4530,6 +4227,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 4
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -4724,6 +4450,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 5
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -4920,6 +4675,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 6
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -5114,6 +4898,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 7
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -5782,6 +5595,18 @@ end]]></value>
 <key><![CDATA[pointerPriority]]></key>
 <value>0</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 5
+end
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -6150,6 +5975,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 8
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -6337,6 +6191,18 @@ end]]></value>
 <key><![CDATA[pointerPriority]]></key>
 <value>0</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 8
+end
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -6464,6 +6330,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 9
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -6660,6 +6555,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 10
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -6854,6 +6778,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 11
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -7050,6 +7003,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 12
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -7244,6 +7226,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 13
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -7440,6 +7451,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 14
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -7634,6 +7674,35 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 15
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -8670,6 +8739,35 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  my_kit_number = 16
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.parent.parent.parent.children.kit_group.children.encoder3:notify("setkit", my_kit_number)
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -9106,6 +9204,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -9248,6 +9378,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -9392,6 +9554,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -9534,6 +9728,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -9730,6 +9956,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -9924,6 +10182,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -10120,6 +10410,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -10314,6 +10636,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -10510,6 +10864,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -10705,6 +11091,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -10899,6 +11317,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -11169,9 +11619,9 @@ end]]></value>
 <property type='r'>
 <key><![CDATA[frame]]></key>
 <value>
-<x>379</x>
+<x>326</x>
 <y>27</y>
-<w>95</w>
+<w>190</w>
 <h>36</h>
 </value>
 </property>
@@ -11213,7 +11663,7 @@ end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignH]]></key>
-<value>1</value>
+<value>2</value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignV]]></key>
@@ -11649,9 +12099,9 @@ end]]></value>
 <property type='r'>
 <key><![CDATA[frame]]></key>
 <value>
-<x>379</x>
+<x>326</x>
 <y>64</y>
-<w>95</w>
+<w>190</w>
 <h>36</h>
 </value>
 </property>
@@ -11693,7 +12143,7 @@ end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignH]]></key>
-<value>1</value>
+<value>2</value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignV]]></key>
@@ -11769,9 +12219,9 @@ end]]></value>
 <property type='r'>
 <key><![CDATA[frame]]></key>
 <value>
-<x>380</x>
+<x>326</x>
 <y>104</y>
-<w>95</w>
+<w>190</w>
 <h>36</h>
 </value>
 </property>
@@ -11813,7 +12263,7 @@ end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignH]]></key>
-<value>1</value>
+<value>2</value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignV]]></key>
@@ -11889,9 +12339,9 @@ end]]></value>
 <property type='r'>
 <key><![CDATA[frame]]></key>
 <value>
-<x>380</x>
+<x>326</x>
 <y>144</y>
-<w>95</w>
+<w>190</w>
 <h>36</h>
 </value>
 </property>
@@ -11933,7 +12383,7 @@ end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignH]]></key>
-<value>1</value>
+<value>2</value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignV]]></key>
@@ -12009,9 +12459,9 @@ end]]></value>
 <property type='r'>
 <key><![CDATA[frame]]></key>
 <value>
-<x>380</x>
+<x>326</x>
 <y>184</y>
-<w>95</w>
+<w>190</w>
 <h>36</h>
 </value>
 </property>
@@ -12053,7 +12503,7 @@ end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignH]]></key>
-<value>1</value>
+<value>2</value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignV]]></key>
@@ -12129,9 +12579,9 @@ end]]></value>
 <property type='r'>
 <key><![CDATA[frame]]></key>
 <value>
-<x>378</x>
+<x>326</x>
 <y>224</y>
-<w>95</w>
+<w>190</w>
 <h>36</h>
 </value>
 </property>
@@ -12173,7 +12623,7 @@ end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignH]]></key>
-<value>1</value>
+<value>2</value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignV]]></key>
@@ -12249,9 +12699,9 @@ end]]></value>
 <property type='r'>
 <key><![CDATA[frame]]></key>
 <value>
-<x>378</x>
+<x>326</x>
 <y>264</y>
-<w>95</w>
+<w>190</w>
 <h>36</h>
 </value>
 </property>
@@ -12293,7 +12743,7 @@ end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignH]]></key>
-<value>1</value>
+<value>2</value>
 </property>
 <property type='i'>
 <key><![CDATA[textAlignV]]></key>
@@ -12536,6 +12986,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -12730,6 +13212,34 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      print(type(self.parent.children[i]))
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -12926,6 +13436,34 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      print(type(self.parent.children[i]))
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -13120,6 +13658,34 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    for i = 1,#self.parent.children,1 do
+      print(type(self.parent.children[i]))
+      self.parent.children[i]:notify("turn_off")
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -13436,6 +14002,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -13630,6 +14228,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -13826,6 +14456,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -14020,6 +14682,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -15177,6 +15871,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -15371,6 +16097,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -15567,6 +16325,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -15761,6 +16551,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -16077,6 +16899,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -16271,6 +17125,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -16467,6 +17353,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -16661,6 +17579,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -16977,6 +17927,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -17171,6 +18153,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -17775,6 +18789,486 @@ end]]></value>
 </value>
 </values>
 </node>
+<node ID='c6fff1f8-6d23-11ee-9be8-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>100</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text104]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Swing 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='c87f597e-6d23-11ee-9c4a-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>160</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text105]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Swing 3
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='c9e30f0e-6d23-11ee-a76d-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>220</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text106]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Swing 4
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='cc898bfc-6d23-11ee-8c70-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>280</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text107]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Swing 5
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
 </children>
 </node>
 <node ID='228e494e-6ba7-11ee-9c1c-74d435b906e1' type='GROUP'>
@@ -17909,9 +19403,9 @@ end]]></value>
 <property type='c'>
 <key><![CDATA[color]]></key>
 <value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
+<r>0.290196</r>
+<g>1</g>
+<b>0.376471</b>
 <a>1</a>
 </value>
 </property>
@@ -17967,6 +19461,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -18163,6 +19689,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -18358,6 +19916,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -18552,6 +20142,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -18868,6 +20490,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -19062,6 +20716,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -19258,6 +20944,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -19452,6 +21170,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -19768,6 +21518,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -19890,6 +21672,846 @@ end]]></value>
 </arguments>
 </osc>
 </messages>
+</node>
+<node ID='e40849ee-6d23-11ee-9638-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>120</x>
+<y>100</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text108]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[SideStick 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='e5a6799c-6d23-11ee-921f-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>119</x>
+<y>160</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text109]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[SideStick 3
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='e8757b1e-6d23-11ee-84d9-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>119</x>
+<y>220</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text110]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[SideStick 4
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='ea9a6580-6d23-11ee-953e-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>118</x>
+<y>280</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text111]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[SideStick 5
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='f44800ba-6d23-11ee-92a3-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>379</x>
+<y>100</y>
+<w>115</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text112]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[PercussBeat 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='f75698ac-6d23-11ee-9e1a-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>379</x>
+<y>160</y>
+<w>115</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text113]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[PercussBeat 3
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='fa1e15c4-6d23-11ee-b515-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>379</x>
+<y>220</y>
+<w>115</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text114]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[PercussBeat 4
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
 </node>
 </children>
 </node>
@@ -20083,6 +22705,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -20279,6 +22933,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -20474,6 +23160,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -20668,6 +23386,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -20983,6 +23733,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -21374,6 +24156,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -21617,6 +24431,1720 @@ end]]></value>
 </value>
 </values>
 </node>
+<node ID='05ae7f6e-6d24-11ee-bea2-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>118</x>
+<y>100</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text115]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[LatinBeat 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='0714b33c-6d24-11ee-8eba-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>118</x>
+<y>160</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text116]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[LatinBeat 3
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='08485dda-6d24-11ee-8a14-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>118</x>
+<y>220</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text117]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[LatinBeat 4
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='0faab866-6d24-11ee-bb6f-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>100</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text118]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Conga 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='11aea21c-6d24-11ee-b19f-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>160</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text119]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Conga 3
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='ccd9d3e8-6d35-11ee-81a7-74d435b906e1' type='GRID'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[exclusive]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>639</x>
+<y>-11</y>
+<w>240</w>
+<h>240</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridNaming]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridOrder]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridStart]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridType]]></key>
+<value>4</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridX]]></key>
+<value>2</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridY]]></key>
+<value>2</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[grid1]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+<messages>
+<midi>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<message>
+<type>CONTROLCHANGE</type>
+<channel>0</channel>
+<data1>0</data1>
+<data2>0</data2>
+</message>
+<values>
+<value>
+<type>CONSTANT</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>15</scaleMax>
+</value>
+<value>
+<type>INDEX</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</value>
+<value>
+<type>VALUE</type>
+<key><![CDATA[x]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>127</scaleMax>
+</value>
+</values>
+</midi>
+<osc>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<path>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>PROPERTY</type>
+<conversion>STRING</conversion>
+<value><![CDATA[parent.name]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>INDEX</type>
+<conversion>INTEGER</conversion>
+<value><![CDATA[]]></value>
+<scaleMin>1</scaleMin>
+<scaleMax>2</scaleMax>
+</partial>
+</path>
+<arguments>
+<partial>
+<type>VALUE</type>
+<conversion>FLOAT</conversion>
+<value><![CDATA[x]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+</arguments>
+</osc>
+</messages>
+<children>
+<node ID='ccd9d596-6d35-11ee-93aa-74d435b906e1' type='FADER'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[bar]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[barDisplay]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[cursor]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[cursorDisplay]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>3</x>
+<y>3</y>
+<w>116</w>
+<h>116</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[grid]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[gridColor]]></key>
+<value>
+<r>0</r>
+<g>0</g>
+<b>0</b>
+<a>0.25</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridSteps]]></key>
+<value>13</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[1]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[response]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[responseFactor]]></key>
+<value>100</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[x]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[0]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+<messages>
+<midi>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<message>
+<type>CONTROLCHANGE</type>
+<channel>0</channel>
+<data1>0</data1>
+<data2>0</data2>
+</message>
+<values>
+<value>
+<type>CONSTANT</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>15</scaleMax>
+</value>
+<value>
+<type>INDEX</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</value>
+<value>
+<type>VALUE</type>
+<key><![CDATA[x]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>127</scaleMax>
+</value>
+</values>
+</midi>
+<osc>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<path>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>PROPERTY</type>
+<conversion>STRING</conversion>
+<value><![CDATA[parent.name]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>INDEX</type>
+<conversion>INTEGER</conversion>
+<value><![CDATA[]]></value>
+<scaleMin>1</scaleMin>
+<scaleMax>2</scaleMax>
+</partial>
+</path>
+<arguments>
+<partial>
+<type>VALUE</type>
+<conversion>FLOAT</conversion>
+<value><![CDATA[x]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+</arguments>
+</osc>
+</messages>
+</node>
+<node ID='ccd9d65e-6d35-11ee-aaf0-74d435b906e1' type='FADER'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[bar]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[barDisplay]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[cursor]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[cursorDisplay]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>122</x>
+<y>3</y>
+<w>116</w>
+<h>116</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[grid]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[gridColor]]></key>
+<value>
+<r>0</r>
+<g>0</g>
+<b>0</b>
+<a>0.25</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridSteps]]></key>
+<value>13</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[2]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[response]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[responseFactor]]></key>
+<value>100</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[x]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[0]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+<messages>
+<midi>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<message>
+<type>CONTROLCHANGE</type>
+<channel>0</channel>
+<data1>0</data1>
+<data2>0</data2>
+</message>
+<values>
+<value>
+<type>CONSTANT</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>15</scaleMax>
+</value>
+<value>
+<type>INDEX</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</value>
+<value>
+<type>VALUE</type>
+<key><![CDATA[x]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>127</scaleMax>
+</value>
+</values>
+</midi>
+<osc>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<path>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>PROPERTY</type>
+<conversion>STRING</conversion>
+<value><![CDATA[parent.name]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>INDEX</type>
+<conversion>INTEGER</conversion>
+<value><![CDATA[]]></value>
+<scaleMin>1</scaleMin>
+<scaleMax>2</scaleMax>
+</partial>
+</path>
+<arguments>
+<partial>
+<type>VALUE</type>
+<conversion>FLOAT</conversion>
+<value><![CDATA[x]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+</arguments>
+</osc>
+</messages>
+</node>
+<node ID='ccd9d726-6d35-11ee-8a74-74d435b906e1' type='FADER'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[bar]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[barDisplay]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[cursor]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[cursorDisplay]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>3</x>
+<y>122</y>
+<w>116</w>
+<h>116</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[grid]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[gridColor]]></key>
+<value>
+<r>0</r>
+<g>0</g>
+<b>0</b>
+<a>0.25</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridSteps]]></key>
+<value>13</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[3]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[response]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[responseFactor]]></key>
+<value>100</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[x]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[0]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+<messages>
+<midi>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<message>
+<type>CONTROLCHANGE</type>
+<channel>0</channel>
+<data1>0</data1>
+<data2>0</data2>
+</message>
+<values>
+<value>
+<type>CONSTANT</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>15</scaleMax>
+</value>
+<value>
+<type>INDEX</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</value>
+<value>
+<type>VALUE</type>
+<key><![CDATA[x]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>127</scaleMax>
+</value>
+</values>
+</midi>
+<osc>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<path>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>PROPERTY</type>
+<conversion>STRING</conversion>
+<value><![CDATA[parent.name]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>INDEX</type>
+<conversion>INTEGER</conversion>
+<value><![CDATA[]]></value>
+<scaleMin>1</scaleMin>
+<scaleMax>2</scaleMax>
+</partial>
+</path>
+<arguments>
+<partial>
+<type>VALUE</type>
+<conversion>FLOAT</conversion>
+<value><![CDATA[x]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+</arguments>
+</osc>
+</messages>
+</node>
+<node ID='ccd9d78a-6d35-11ee-8cd0-74d435b906e1' type='FADER'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[bar]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[barDisplay]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[cursor]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[cursorDisplay]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>122</x>
+<y>122</y>
+<w>116</w>
+<h>116</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[grid]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[gridColor]]></key>
+<value>
+<r>0</r>
+<g>0</g>
+<b>0</b>
+<a>0.25</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[gridSteps]]></key>
+<value>13</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[4]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[response]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[responseFactor]]></key>
+<value>100</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[x]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[0]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+<messages>
+<midi>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<message>
+<type>CONTROLCHANGE</type>
+<channel>0</channel>
+<data1>0</data1>
+<data2>0</data2>
+</message>
+<values>
+<value>
+<type>CONSTANT</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>15</scaleMax>
+</value>
+<value>
+<type>INDEX</type>
+<key><![CDATA[]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</value>
+<value>
+<type>VALUE</type>
+<key><![CDATA[x]]></key>
+<scaleMin>0</scaleMin>
+<scaleMax>127</scaleMax>
+</value>
+</values>
+</midi>
+<osc>
+<enabled>1</enabled>
+<send>1</send>
+<receive>1</receive>
+<feedback>0</feedback>
+<connections>11111</connections>
+<triggers>
+<trigger>
+<var><![CDATA[x]]></var>
+<condition>ANY</condition>
+</trigger>
+</triggers>
+<path>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>PROPERTY</type>
+<conversion>STRING</conversion>
+<value><![CDATA[parent.name]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>CONSTANT</type>
+<conversion>STRING</conversion>
+<value><![CDATA[/]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+<partial>
+<type>INDEX</type>
+<conversion>INTEGER</conversion>
+<value><![CDATA[]]></value>
+<scaleMin>1</scaleMin>
+<scaleMax>2</scaleMax>
+</partial>
+</path>
+<arguments>
+<partial>
+<type>VALUE</type>
+<conversion>FLOAT</conversion>
+<value><![CDATA[x]]></value>
+<scaleMin>0</scaleMin>
+<scaleMax>1</scaleMax>
+</partial>
+</arguments>
+</osc>
+</messages>
+</node>
+</children>
+</node>
 </children>
 </node>
 <node ID='b3535b36-6ba7-11ee-9b5a-74d435b906e1' type='GROUP'>
@@ -21809,6 +26337,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -22515,6 +27075,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -22709,6 +27301,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -22905,6 +27529,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -23092,6 +27748,38 @@ end]]></value>
 <key><![CDATA[pointerPriority]]></key>
 <value>0</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -23219,6 +27907,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -23414,6 +28134,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -23658,6 +28410,638 @@ end]]></value>
 </value>
 </values>
 </node>
+<node ID='1b93e81e-6d24-11ee-8358-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>119</x>
+<y>100</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text120]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Bossa 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='1d5ad6e4-6d24-11ee-a887-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>119</x>
+<y>228</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text121]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Samba 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='1f42af40-6d24-11ee-b7a9-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>100</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text122]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[DanceBeat 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='209c4d38-6d24-11ee-b930-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>160</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text123]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[DanceBeat 3
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='2211d9bc-6d24-11ee-9bf9-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>392</x>
+<y>220</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text124]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[DanceBeat 4
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
 </children>
 </node>
 <node ID='9d0b118c-6c76-11ee-bd65-dcfb48dae4d6' type='GROUP'>
@@ -23850,6 +29234,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -24046,6 +29462,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -24241,6 +29689,38 @@ end]]></value>
 <key><![CDATA[release]]></key>
 <value>1</value>
 </property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
+</property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
 <value>1</value>
@@ -24435,6 +29915,38 @@ end]]></value>
 <property type='b'>
 <key><![CDATA[release]]></key>
 <value>1</value>
+</property>
+<property type='s'>
+<key><![CDATA[script]]></key>
+<value><![CDATA[function init()
+  off_color = "#FF0000FF"
+  on_color = "#4AFF60FF"
+end
+
+function onReceiveNotify(key, value)
+  if key == "turn_off" then
+    self.color = off_color
+  end
+end
+
+function disable_others()
+    
+    for pages =  2,8,1 do
+      
+      for i = 1,#self.parent.parent.children[pages].children,1 do
+        self.parent.parent.children[pages].children[i]:notify("turn_off")
+      end
+    end
+end
+
+
+function onValueChanged(key)
+ if self.values[key] == true then
+    
+    self.color = on_color
+    disable_others()
+ end
+end]]></value>
 </property>
 <property type='i'>
 <key><![CDATA[shape]]></key>
@@ -24679,528 +30191,369 @@ end]]></value>
 </value>
 </values>
 </node>
+<node ID='3183c220-6d24-11ee-80ea-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>260</x>
+<y>100</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text125]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Metronome 2
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='327f5ebe-6d24-11ee-b717-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>260</x>
+<y>160</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text126]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Metronome 3
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
+<node ID='33709784-6d24-11ee-9ee1-74d435b906e1' type='TEXT'>
+<properties>
+<property type='b'>
+<key><![CDATA[background]]></key>
+<value>0</value>
+</property>
+<property type='c'>
+<key><![CDATA[color]]></key>
+<value>
+<r>1</r>
+<g>0</g>
+<b>0</b>
+<a>1</a>
+</value>
+</property>
+<property type='f'>
+<key><![CDATA[cornerRadius]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[font]]></key>
+<value>0</value>
+</property>
+<property type='r'>
+<key><![CDATA[frame]]></key>
+<value>
+<x>260</x>
+<y>220</y>
+<w>95</w>
+<h>32</h>
+</value>
+</property>
+<property type='b'>
+<key><![CDATA[grabFocus]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[interactive]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[locked]]></key>
+<value>0</value>
+</property>
+<property type='s'>
+<key><![CDATA[name]]></key>
+<value><![CDATA[text127]]></value>
+</property>
+<property type='i'>
+<key><![CDATA[orientation]]></key>
+<value>0</value>
+</property>
+<property type='b'>
+<key><![CDATA[outline]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[outlineStyle]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[pointerPriority]]></key>
+<value>0</value>
+</property>
+<property type='i'>
+<key><![CDATA[shape]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignH]]></key>
+<value>1</value>
+</property>
+<property type='i'>
+<key><![CDATA[textAlignV]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[textClip]]></key>
+<value>1</value>
+</property>
+<property type='c'>
+<key><![CDATA[textColor]]></key>
+<value>
+<r>1</r>
+<g>1</g>
+<b>1</b>
+<a>1</a>
+</value>
+</property>
+<property type='i'>
+<key><![CDATA[textSize]]></key>
+<value>14</value>
+</property>
+<property type='b'>
+<key><![CDATA[textWrap]]></key>
+<value>1</value>
+</property>
+<property type='b'>
+<key><![CDATA[visible]]></key>
+<value>1</value>
+</property>
+</properties>
+<values>
+<value>
+<key><![CDATA[text]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>1</lockedDefaultCurrent>
+<default><![CDATA[Metronome 4
+]]></default>
+<defaultPull>0</defaultPull>
+</value>
+<value>
+<key><![CDATA[touch]]></key>
+<locked>0</locked>
+<lockedDefaultCurrent>0</lockedDefaultCurrent>
+<default><![CDATA[false]]></default>
+<defaultPull>0</defaultPull>
+</value>
+</values>
+</node>
 </children>
 </node>
 </children>
-</node>
-<node ID='e1e0decc-6c8a-11ee-91f5-dcfb48dae4d6' type='RADIO'>
-<properties>
-<property type='b'>
-<key><![CDATA[background]]></key>
-<value>1</value>
-</property>
-<property type='c'>
-<key><![CDATA[color]]></key>
-<value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
-<a>1</a>
-</value>
-</property>
-<property type='f'>
-<key><![CDATA[cornerRadius]]></key>
-<value>1</value>
-</property>
-<property type='r'>
-<key><![CDATA[frame]]></key>
-<value>
-<x>440</x>
-<y>30</y>
-<w>392</w>
-<h>50</h>
-</value>
-</property>
-<property type='b'>
-<key><![CDATA[grabFocus]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[interactive]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[locked]]></key>
-<value>0</value>
-</property>
-<property type='s'>
-<key><![CDATA[name]]></key>
-<value><![CDATA[radio1]]></value>
-</property>
-<property type='i'>
-<key><![CDATA[orientation]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[outline]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[outlineStyle]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[pointerPriority]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[radioType]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[shape]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[steps]]></key>
-<value>20</value>
-</property>
-<property type='b'>
-<key><![CDATA[visible]]></key>
-<value>1</value>
-</property>
-</properties>
-<values>
-<value>
-<key><![CDATA[touch]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[false]]></default>
-<defaultPull>0</defaultPull>
-</value>
-<value>
-<key><![CDATA[x]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[0]]></default>
-<defaultPull>0</defaultPull>
-</value>
-</values>
-<messages>
-<midi>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<message>
-<type>CONTROLCHANGE</type>
-<channel>0</channel>
-<data1>0</data1>
-<data2>0</data2>
-</message>
-<values>
-<value>
-<type>CONSTANT</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>15</scaleMax>
-</value>
-<value>
-<type>INDEX</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</value>
-<value>
-<type>VALUE</type>
-<key><![CDATA[x]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</value>
-</values>
-</midi>
-<osc>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<path>
-<partial>
-<type>CONSTANT</type>
-<conversion>STRING</conversion>
-<value><![CDATA[/]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-<partial>
-<type>PROPERTY</type>
-<conversion>STRING</conversion>
-<value><![CDATA[name]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</path>
-<arguments>
-<partial>
-<type>VALUE</type>
-<conversion>INTEGER</conversion>
-<value><![CDATA[x]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</arguments>
-</osc>
-</messages>
-</node>
-<node ID='02970f56-6c8b-11ee-ae43-dcfb48dae4d6' type='RADIO'>
-<properties>
-<property type='b'>
-<key><![CDATA[background]]></key>
-<value>1</value>
-</property>
-<property type='c'>
-<key><![CDATA[color]]></key>
-<value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
-<a>1</a>
-</value>
-</property>
-<property type='f'>
-<key><![CDATA[cornerRadius]]></key>
-<value>1</value>
-</property>
-<property type='r'>
-<key><![CDATA[frame]]></key>
-<value>
-<x>440</x>
-<y>90</y>
-<w>392</w>
-<h>50</h>
-</value>
-</property>
-<property type='b'>
-<key><![CDATA[grabFocus]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[interactive]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[locked]]></key>
-<value>0</value>
-</property>
-<property type='s'>
-<key><![CDATA[name]]></key>
-<value><![CDATA[radio2]]></value>
-</property>
-<property type='i'>
-<key><![CDATA[orientation]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[outline]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[outlineStyle]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[pointerPriority]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[radioType]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[shape]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[steps]]></key>
-<value>20</value>
-</property>
-<property type='b'>
-<key><![CDATA[visible]]></key>
-<value>1</value>
-</property>
-</properties>
-<values>
-<value>
-<key><![CDATA[touch]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[false]]></default>
-<defaultPull>0</defaultPull>
-</value>
-<value>
-<key><![CDATA[x]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[0]]></default>
-<defaultPull>0</defaultPull>
-</value>
-</values>
-<messages>
-<midi>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<message>
-<type>CONTROLCHANGE</type>
-<channel>0</channel>
-<data1>0</data1>
-<data2>0</data2>
-</message>
-<values>
-<value>
-<type>CONSTANT</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>15</scaleMax>
-</value>
-<value>
-<type>INDEX</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</value>
-<value>
-<type>VALUE</type>
-<key><![CDATA[x]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</value>
-</values>
-</midi>
-<osc>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<path>
-<partial>
-<type>CONSTANT</type>
-<conversion>STRING</conversion>
-<value><![CDATA[/]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-<partial>
-<type>PROPERTY</type>
-<conversion>STRING</conversion>
-<value><![CDATA[name]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</path>
-<arguments>
-<partial>
-<type>VALUE</type>
-<conversion>INTEGER</conversion>
-<value><![CDATA[x]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</arguments>
-</osc>
-</messages>
-</node>
-<node ID='291c587a-6c8b-11ee-b64d-dcfb48dae4d6' type='RADIO'>
-<properties>
-<property type='b'>
-<key><![CDATA[background]]></key>
-<value>1</value>
-</property>
-<property type='c'>
-<key><![CDATA[color]]></key>
-<value>
-<r>1</r>
-<g>0</g>
-<b>0</b>
-<a>1</a>
-</value>
-</property>
-<property type='f'>
-<key><![CDATA[cornerRadius]]></key>
-<value>1</value>
-</property>
-<property type='r'>
-<key><![CDATA[frame]]></key>
-<value>
-<x>440</x>
-<y>150</y>
-<w>392</w>
-<h>50</h>
-</value>
-</property>
-<property type='b'>
-<key><![CDATA[grabFocus]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[interactive]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[locked]]></key>
-<value>0</value>
-</property>
-<property type='s'>
-<key><![CDATA[name]]></key>
-<value><![CDATA[radio3]]></value>
-</property>
-<property type='i'>
-<key><![CDATA[orientation]]></key>
-<value>1</value>
-</property>
-<property type='b'>
-<key><![CDATA[outline]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[outlineStyle]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[pointerPriority]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[radioType]]></key>
-<value>0</value>
-</property>
-<property type='i'>
-<key><![CDATA[shape]]></key>
-<value>1</value>
-</property>
-<property type='i'>
-<key><![CDATA[steps]]></key>
-<value>20</value>
-</property>
-<property type='b'>
-<key><![CDATA[visible]]></key>
-<value>1</value>
-</property>
-</properties>
-<values>
-<value>
-<key><![CDATA[touch]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[false]]></default>
-<defaultPull>0</defaultPull>
-</value>
-<value>
-<key><![CDATA[x]]></key>
-<locked>0</locked>
-<lockedDefaultCurrent>0</lockedDefaultCurrent>
-<default><![CDATA[0]]></default>
-<defaultPull>0</defaultPull>
-</value>
-</values>
-<messages>
-<midi>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<message>
-<type>CONTROLCHANGE</type>
-<channel>0</channel>
-<data1>0</data1>
-<data2>0</data2>
-</message>
-<values>
-<value>
-<type>CONSTANT</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>15</scaleMax>
-</value>
-<value>
-<type>INDEX</type>
-<key><![CDATA[]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</value>
-<value>
-<type>VALUE</type>
-<key><![CDATA[x]]></key>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</value>
-</values>
-</midi>
-<osc>
-<enabled>1</enabled>
-<send>1</send>
-<receive>1</receive>
-<feedback>0</feedback>
-<connections>11111</connections>
-<triggers>
-<trigger>
-<var><![CDATA[x]]></var>
-<condition>ANY</condition>
-</trigger>
-</triggers>
-<path>
-<partial>
-<type>CONSTANT</type>
-<conversion>STRING</conversion>
-<value><![CDATA[/]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-<partial>
-<type>PROPERTY</type>
-<conversion>STRING</conversion>
-<value><![CDATA[name]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</path>
-<arguments>
-<partial>
-<type>VALUE</type>
-<conversion>INTEGER</conversion>
-<value><![CDATA[x]]></value>
-<scaleMin>0</scaleMin>
-<scaleMax>1</scaleMax>
-</partial>
-</arguments>
-</osc>
-</messages>
 </node>
 </children>
 </node>
